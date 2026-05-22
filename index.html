@@ -10,7 +10,7 @@
 <body>
     <a-scene mindar-image="imageTargetSrc: ./marker.mind; autoStart: false; uiError:no; uiLoading:no; uiScanning:no;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" renderer="colorManagement: true;">
         <a-assets>
-            <video id="ar-video" src="./asset.mp4" loop playsinline crossorigin="anonymous" controls></video>
+            <video id="ar-video" src="./asset.mp4" loop playsinline></video>
             
         </a-assets>
         
@@ -28,16 +28,37 @@
         </a-entity>
     </a-scene>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const arTarget = document.querySelector('#ar-target');
-            const video = document.querySelector('#ar-video');
-            arTarget.addEventListener('targetFound', () => { 
-                video.play().catch(e => console.error("Video play failed", e)); 
-            });
-            arTarget.addEventListener('targetLost', () => { 
-                video.pause(); 
-            });
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        const arTarget = document.querySelector('#ar-target');
+        const video = document.querySelector('#ar-video');
+
+        // habilitar audio
+        video.muted = false;
+        video.volume = 1.0;
+
+        // desbloquear reproducción con interacción
+        document.body.addEventListener('click', async () => {
+            try {
+                await video.play();
+                video.pause();
+            } catch(e) {
+                console.log("Audio unlock failed", e);
+            }
+        }, { once: true });
+
+        arTarget.addEventListener('targetFound', async () => {
+            try {
+                video.muted = false;
+                await video.play();
+            } catch(e) {
+                console.error("Video play failed", e);
+            }
+     });
+
+    arTarget.addEventListener('targetLost', () => {
+        video.pause();
+    });
+});
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
